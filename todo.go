@@ -28,19 +28,31 @@ type Todo struct {
 var dbData embed.FS
 
 func initialize() *gorm.DB {
-	tempFile, err := os.CreateTemp("", "db.*")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer tempFile.Close()
+	var tempFile *os.File
+	var err error
+	if os.Getenv("DBFILE") == "" {
+		tempFile, err = os.CreateTemp("", "db.*")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer tempFile.Close()
 
-	fileData, err := dbData.ReadFile("db.sqlite")
-	if err != nil {
-		log.Fatal(err)
-	}
+		os.Setenv("DBFILE", tempFile.Name())
 
-	if _, err := tempFile.Write(fileData); err != nil {
-		log.Fatal(err)
+		fileData, err := dbData.ReadFile("db.sqlite")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if _, err := tempFile.Write(fileData); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		tempFile, err = os.Open(os.Getenv("DBFILE"))
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	db, err := gorm.Open(sqlite.Open(tempFile.Name()), &gorm.Config{
@@ -69,7 +81,9 @@ func initialize() *gorm.DB {
 		db.Exec("CREATE TABLE IF NOT EXISTS Todos (ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, Name VARCHAR(50), Description TEXT, Priority VARCHAR(6), CreatedDate DATE);")
 	}
 
+
 	return db
+
 }
 
 var db *gorm.DB
@@ -108,7 +122,56 @@ func List(priority string) {
 }
 
 func Add(Name, Description, Priority string) {
-	fmt.Println(Name, Description, Priority)
+	Name = strings.Trim(Name, " ")
+	if Name == "" {
+		fmt.Println("Name field must contain a value")
+		return
+	}
+
+	Description = strings.Trim(Description, " ")
+
+	if Description == "" {
+		fmt.Println("Description must contain a value")
+		return
+	}
+
+	Priority = PriorityAssessment(Priority)
+
+	todo := Todo{
+		ID: 		0,
+		Name:        Name,
+		Description: Description,
+		Priority:    Priority,
+		CreatedDate: time.Now().Local().Format("2006-01-02"),
+	}
+
+	result := db.Table("Todos").Omit("ID").Create(&todo)
+
+	fmt.Println(todo.ID)
+	fmt.Println(todo.Name)
+	fmt.Println(todo.Description)
+	fmt.Println(todo.Priority)
+
+	if result.Error != nil {
+		fmt.Println("Error: ", result.Error)
+		return
+	}
+
+	fmt.Println("Item Added Successfully")
+}
+
+func PriorityAssessment(priority string) string {
+	toLower := strings.ToLower(priority)
+	switch toLower {
+		case "urgent":
+		case "high":
+		case "medium":
+		case "low":
+			break
+		default:
+			toLower = "low"
+	}
+	return toLower
 }
 
 func AddScript() {
@@ -172,14 +235,6 @@ func main() {
 			fmt.Println(errorFmt("Arguments must be in a specific format\n"))
 			AddScript()
 			return
-		}
-
-		for i, field := range flag.Args() {
-			if i == 0 {
-				continue
-			}
-
-			fmt.Println(i, field)
 		}
 
 		Add(name, description, priority)
