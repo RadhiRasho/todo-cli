@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
+	"github.com/rodaine/table"
 	"gorm.io/gorm"
 )
 
@@ -31,17 +33,22 @@ func Add(db *gorm.DB, Name, Description, Priority string) {
 
 	result := db.Table("Todos").Omit("ID").Create(&todo)
 
-	fmt.Println(todo.ID)
-	fmt.Println(todo.Name)
-	fmt.Println(todo.Description)
-	fmt.Println(todo.Priority)
-
 	if result.Error != nil {
 		fmt.Println("Error: ", result.Error)
 		return
 	}
 
-	fmt.Println("Item Added Successfully")
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
+
+	tbl := table.New("ID", "Name", "Description", "Priority", "CreatedDate")
+	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt).WithPadding(3)
+
+	tbl.AddRow(todo.ID, todo.Name, todo.Description, todo.Priority, todo.CreatedDate)
+
+	tbl.Print()
+
+	fmt.Println("\nItem Added Successfully")
 }
 
 func PriorityAssessment(priority string) string {
