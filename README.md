@@ -1,6 +1,8 @@
 # todo-cli
 Quick Todo CLI using Go and SQLite
 
+![image](https://github.com/RadhiRasho/todo-cli/assets/54078496/658553be-102a-4d92-a343-15f971ae3241)
+
 ## Description
 
 This is a simple CLI application that allows you to manage your tasks. You can add a new task with Name, Description and Priority. You can list all tasks auto sorted by Priority. You can delete a task by ID or by Name. You can also list all tasks with a specific priority.
