@@ -9,7 +9,7 @@ import (
 )
 
 
-func CLI() {
+func Cli() {
 	db := initialize()
 
 	flag.String("Help", "", "List of possible commands")
