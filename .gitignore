@@ -41,3 +41,6 @@ db.sqlite
 
 # Go workspace file
 go.work
+
+# Vendor Dep
+vendor
