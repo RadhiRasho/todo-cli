@@ -22,7 +22,7 @@ The tasks are stored in a SQLite database. The database file is created in the u
 
 ## Installation
 ```bash
-go get github.com/RadhiRasho/todo-cli
+go install github.com/RadhiRasho/todo-cli@latest
 ```
 
 ## Usage
