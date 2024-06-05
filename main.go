@@ -8,7 +8,6 @@ import (
 	"github.com/fatih/color"
 )
 
-
 func main() {
 	db := initialize()
 

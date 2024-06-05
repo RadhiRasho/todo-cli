@@ -14,7 +14,6 @@ func Clean() {
 		panic(err)
 	}
 
-
 	err = os.Remove(filePath)
 	if err != nil {
 		panic(err)

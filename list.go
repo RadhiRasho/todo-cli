@@ -5,6 +5,7 @@ import (
 	"github.com/rodaine/table"
 	"gorm.io/gorm"
 )
+
 func List(db *gorm.DB, priority string) {
 	Todos := db.Order(`
 	CASE Priority
